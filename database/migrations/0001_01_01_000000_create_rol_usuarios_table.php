@@ -19,9 +19,7 @@ return new class extends Migration
             $table->enum('modificarPaquetes', ['Y', 'N']);
             $table->enum('verEstadisticasGlobales', ['Y', 'N']);
             $table->enum('crearUsuarios', ['Y', 'N']);
-            $table->enum('estadisticasDeSuSucursal', ['Y', 'N']);
             $table->enum('gestionarPaquetes', ['Y', 'N']);
-            $table->enum('gestionarPaquetesGlobales', ['Y', 'N']);
             $table->enum('modificarUsuarios', ['Y', 'N']);
             $table->timestamps();
         });

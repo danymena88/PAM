@@ -11,45 +11,61 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [AuthController::class, 'index']);
 Route::get('/login', [AuthController::class, 'loginGet']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/register', [AuthController::class, 'registerGet']);
-Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::get('/admin', [AdminController::class, 'admin'])->middleware('auth');
+
 Route::get('/admin/add-usuarios', [AdminController::class, 'addUsuarios'])->middleware('auth');
+Route::post('/admin/adduser', [AdminController::class, 'addUser'])->middleware('auth');
+Route::get('admin/search', [AdminController::class, 'search']);
+
+Route::get('/admin/mod-user', [AdminController::class, 'modUser'])->middleware('auth');
+Route::get('admin/search-user', [AdminController::class, 'busquedaParaUsuario']);
+Route::get('/admin/mod-user/mod/{id}', [AdminController::class, 'modUserMod'])->middleware('auth');
+Route::post('/admin/mod-user/mod/modificadoUser', [AdminController::class, 'modificadoUser'])->middleware('auth');
+
 Route::get('/admin/grupos', [AdminController::class, 'addGrupos'])->middleware('auth');
 Route::post('/admin/addgrupo', [AdminController::class, 'nuevoGrupo'])->middleware('auth');
 Route::get('/admin/eliminar-grupo/{id}', [AdminController::class, 'eliminarGrupo'])->middleware('auth');
+Route::get('/admin/modificar-grupo/{id}', [AdminController::class, 'modificarGrupo'])->middleware('auth');
+Route::post('/admin/modificar-grupo/updategrupo', [AdminController::class, 'updateGrupo'])->middleware('auth');
+Route::get('admin/search-g', [AdminController::class, 'searchg']);
 
-Route::get('/admin/ver-cursos', [AdminController::class, 'vercursos'])->middleware('auth');
-Route::get('/admin/acciones-cursos', [AdminController::class, 'accionescursos'])->middleware('auth');
-Route::post('/admin/acciones-cursos', [AdminController::class, 'accionescursosPost']);
-Route::post('/admin/eliminar-curso', [AdminController::class, 'eliminarCurso']);
-Route::get('/admin/usuarios-acciones', [AdminController::class, 'accionesusuarios'])->middleware('auth');
-Route::get('admin/search', [AdminController::class, 'search']);
-Route::get('/admin/usuarios-acciones/{id}', [AdminController::class, 'accionesId'])->middleware('auth');
-Route::get('/admin/usuarios-acciones/{id}/eliminar', [AdminController::class, 'eliminarUserId'])->middleware('auth');
-Route::post('/admin/usuarios-acciones/{id}/update', [AdminController::class, 'updateUserId'])->middleware('auth');
-Route::get('/admin/capitulos-acciones', [AdminController::class, 'accionescapitulos'])->middleware('auth');
-Route::post('/admin/capitulos-acciones', [AdminController::class, 'accionescapitulosPost'])->middleware('auth');
-Route::get('/cursos/{curso}', [GeneralController::class, 'getCurso']);
-Route::get('/cursos/suscripcion/{id_curso}', [VentasController::class, 'suscripcion'])->middleware('auth');
-Route::get('/cursos/{curso}/{num}', [VentasController::class, 'verCapitulos'])->middleware('auth');
-Route::get('/admin/capitulos-acciones/{id}/eliminar', [AdminController::class, 'eliminarcapitulo'])->middleware('auth');
-Route::get('/cursos', [GeneralController::class, 'getCursos']);
+Route::get('/admin/envio', [AdminController::class, 'envio'])->middleware('auth');
+Route::get('/admin/mis-envios', [AdminController::class, 'misEnvios'])->middleware('auth');
+Route::get('/admin/envio-anular-u', [AdminController::class, 'envioUsuarioAnular']);
+Route::get('/admin/anular-envio', [AdminController::class, 'envioUsuarioConfirmacion'])->middleware('auth');
+Route::get('/admin/envio-anulado', [AdminController::class, 'envioAnulado'])->middleware('auth');
+Route::get('admin/search-envio', [AdminController::class, 'busquedaParaEnvio']);
+Route::get('admin/search-modenvio', [AdminController::class, 'busquedaParaModEnvio']);
+Route::get('admin/envio-usuario', [AdminController::class, 'envioUsuario']);
+Route::get('admin/enviado',[AdminController::class, 'enviadoPaquete']);
+
+Route::get('/admin/modificar-envio', [AdminController::class, 'modEnvio'])->middleware('auth');
+
+Route::get('/admin/glob-stats', [AdminController::class, 'globStats'])->middleware('auth');
+
+Route::get('/admin/gest-paquete', [AdminController::class, 'gestPaquete'])->middleware('auth');
+Route::get('admin/get-descripcion', [AdminController::class, 'getDescripcion']);
+Route::get('/admin/get-anular', [AdminController::class, 'getAnular']);
+Route::get('/admin/envio-aprobsal', [AdminController::class, 'envioAprob'])->middleware('auth');
+Route::get('admin/get-entrante', [AdminController::class, 'gestEntrante']);
+Route::get('admin/get-entrante2', [AdminController::class, 'gestEntrante2']);
+Route::get('/admin/envio-aprobent', [AdminController::class, 'envioAprobent'])->middleware('auth');
+Route::get('/admin/recibido', [AdminController::class, 'envioRecibido'])->middleware('auth');
+Route::get('/admin/cambio-destinatario/{id_envio}', [AdminController::class, 'modDestinatario'])->middleware('auth');
+
+Route::get('/admin/codigos', [AdminController::class, 'codigos'])->middleware('auth');
 
 
 
 
 
-Route::get('/linea_produccion/lista', [LineaProduccionController::class, 'index'])->middleware('auth');
 
-Route::get('/linea_produccion/nuevo', [LineaProduccionController::class, 'create']);
-Route::post('/linea_produccion/nuevo', [LineaProduccionController::class, 'store']);
-Route::get('/linea_produccion/eliminar/{id}', [LineaProduccionController::class, 'destroy']);
-Route::get('/linea_produccion/actualizar/{id}', [LineaProduccionController::class, 'edit']);
-Route::post('/linea_produccion/actualizar/{id}', [LineaProduccionController::class, 'update']);
 
-Route::get('/producto/lista', [ProductoController::class, 'index']);
-Route::get('/producto/nuevo', [ProductoController::class, 'create']);
-Route::post('/producto/nuevo', [ProductoController::class, 'store']);
+
+
+
+
+
+

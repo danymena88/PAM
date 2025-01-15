@@ -14,7 +14,7 @@ class AuthController extends Controller
     public function index()
     {
         // return redirect('/login');
-        return view('welcome');
+        return redirect('/login');
     }
 
     public function loginGet()
@@ -22,56 +22,40 @@ class AuthController extends Controller
         return view('auth.authentication-login1');
     }
 
-    public function registerGet()
-    {
-        return view('auth.authentication-register1');
-    }
-
-    public function register(Request $request)
-    {
-        $newUser = new User();
-        $newUser->name = $request->post('name');
-        $newUser->email = $request->post('email');
-        $newUser->password = Hash::make($request->post('password'));
-        $newUser->id_rol = 2;
-        $userRegistered = $newUser->crear($newUser);
-        return view('auth.authentication-login1');
-    }
 
     public function login(Request $request)
     {
         $modelUser = new User();
+        if ($request->post('email') != '' && $request->post('password') != '')
+        {
+            $user = $modelUser->obtenerPorEmail($request->post('email'));
 
-        $user = $modelUser->obtenerPorEmail($request->post('email'));
+            if ($user != null) {
+                if (Hash::check($request->post('password'), $user->password)) {
 
-        if ($user != null) {
-            if (Hash::check($request->post('password'), $user->password)) {
-
-                $request->session()->put('user_id', $user->id);
-                $request->session()->put('primerNombre', $user->primerNombre);
-                $request->session()->put('primerApellido', $user->primerApellido);
-                $request->session()->put('genero', $user->genero);
-                $request->session()->put('sucursal', $modelUser->obtenerSucursal($user->id));
-                $request->session()->put('rol', $user->id_rol_usuarios);
-                $request->session()->put('email', $user->email);
-                
-                Auth::login($user);
-                return redirect('/admin');
-                /* if ($user->id_rol == 1)
-                {
+                    $request->session()->put('user_id', $user->id);
+                    $request->session()->put('primerNombre', $user->primerNombre);
+                    $request->session()->put('primerApellido', $user->primerApellido);
+                    $request->session()->put('genero', $user->genero);
+                    $request->session()->put('sucursal', $modelUser->obtenerSucursal($user->id));
+                    $request->session()->put('sucursalId', $user->id_sucursal);
+                    $request->session()->put('rol', $user->id_rol_usuarios);
+                    $request->session()->put('email', $user->email);
+                    
+                    Auth::login($user);
                     return redirect('/admin');
-                }
-                else
-                {
-                    return redirect('/');
-                } */
-            } 
-            
-            return redirect('/login')->with(['resultado' => "F"]);
+                    
+                } 
+                
+                return redirect('/login')->with(['resultado' => "F"]);
 
+            }
+
+            return redirect('/login')->with(['resultado' => "N"]);
         }
-
-        return redirect('/login')->with(['resultado' => "N"]);
+        else{
+            return redirect('/login')->with(['resultado' => "Q"]);
+        }
     }
 
     public function logout(Request $request)

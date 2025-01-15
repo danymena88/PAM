@@ -1,0 +1,22 @@
+
+   Symfony\Component\Process\Exception\RuntimeException 
+
+  TTY mode is not supported on Windows platform.
+
+  at vendor\symfony\process\Process.php:1013
+    1009▕      */
+    1010▕     public function setTty(bool $tty): static
+    1011▕     {
+    1012▕         if ('\\' === \DIRECTORY_SEPARATOR && $tty) {
+  ➜ 1013▕             throw new RuntimeException('TTY mode is not supported on Windows platform.');
+    1014▕         }
+    1015▕ 
+    1016▕         if ($tty && !self::isTtySupported()) {
+    1017▕             throw new RuntimeException('TTY mode requires /dev/tty to be read/writable.');
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Console\DbCommand.php:51
+      Symfony\Component\Process\Process::setTty()
+
+  2   vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+      Illuminate\Database\Console\DbCommand::handle()
+

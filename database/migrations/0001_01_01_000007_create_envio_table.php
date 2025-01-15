@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('envio', function (Blueprint $table) {
             $table->id();
-            $table->dateTime('fechaEnvio', precision: 0)->nullable(false);
             $table->enum('aprobadoPamRemitente', ['Y', 'N']);
             $table->enum('aprobadoPamDestino', ['Y', 'N']);
             $table->enum('recibidoDestinatario', ['Y', 'N']);
-            $table->dateTime('fechaRecibido', precision: 0)->nullable(false);
-
+            $table->enum('anulado', ['Y', 'N']);
+            $table->dateTime('fechaRecibido', precision: 0)->nullable();
+            $table->bigInteger('sucRemitente')->unsigned()->nullable(false);
+            $table->bigInteger('sucDestinatario')->unsigned()->nullable(false);
             $table->bigInteger('idRemitente')->unsigned()->nullable(false);
             $table->bigInteger('idDestinatario')->unsigned()->nullable(false);
             $table->bigInteger('idDescripcionPaquete')->unsigned()->nullable(false);
@@ -27,6 +28,7 @@ return new class extends Migration
             $table->foreign('idDestinatario')->references('id')->on('users')->noActionOnDelete();
             $table->foreign('idDescripcionPaquete')->references('id')->on('paquete')->noActionOnDelete();
             $table->foreign('idCodigoPaquete')->references('id')->on('codigos')->noActionOnDelete();
+            $table->timestamps();
         });
     }
 

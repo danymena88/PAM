@@ -22,6 +22,7 @@
 </head>
 
 <body>
+<script src="{{ URL::asset('js/jquery.min.js'); }}"></script>
     <!-- ============================================================== -->
     <!-- Preloader - style you can find in spinners.css -->
     <!-- ============================================================== -->
@@ -51,7 +52,8 @@
                     <div class="navbar-brand">
                         <!-- Logo icon -->
                         <a href="/">
-                            <img src="images/logo.png" alt="" class="img-fluid">
+                            {{-- <img src="{{ URL::asset('images/logo.png'); }}" class="img-fluid" style="max-width:180px;"> --}}
+                            <span style="font-size: 30px; color: gray; margin-bottom: 0;">TrackLog</span>
                         </a>
                     </div>
                     <!-- ============================================================== -->
@@ -60,10 +62,37 @@
                     <!-- ============================================================== -->
                     <!-- Toggle which is visible on mobile only -->
                     <!-- ============================================================== -->
-                    <a class="topbartoggler d-block d-lg-none waves-effect waves-light" href="javascript:void(0)"
+                    
+                    
+                    
+                    <!-- <a class="topbartoggler d-block d-lg-none waves-effect waves-light" href="javascript:void(0)"
                         data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><i
-                            class="ti-more"></i></a>
+                            class="ti-more"></i></a> -->
+
+                            
+                            <a class="nav-link dropdown-toggle d-lg-none me-2" href="javascript:void(0)" data-bs-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false" href="javascript:void(0)">
+                                <img src="/images/dashboard/profile-pic.jpg" alt="user" class="rounded-circle"
+                                    width="40">
+                                <span class="ms-2 d-none d-lg-inline-block text-dark">{{ session('primerNombre')}} {{ session('primerApellido')}}<i data-feather="chevron-down"
+                                        class="svg-icon"></i></span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end dropdown-menu-right user-dd animated flipInY">
+                            <a class="dropdown-item" href="/admin"><i data-feather="clipboard"
+                                    class="svg-icon me-2 ms-1"></i>
+                                Panel</a>
+                                <a class="dropdown-item" href="/admin"><i data-feather="settings"
+                                    class="svg-icon me-2 ms-1"></i>
+                                Contraseña</a>
+                                <div class="dropdown-divider"></div>
+                                <form action="/logout" method="POST" class="d-flex" role="search">
+                                    @csrf
+                                    <button class="dropdown-item" type="submit"><i data-feather="power"
+                                        class="svg-icon me-2 ms-1"></i>Logout</button>
+                                </form>
+                            </div>
+                        
                 </div>
                 <!-- ============================================================== -->
                 <!-- End Logo -->
@@ -86,12 +115,12 @@
                                         class="svg-icon"></i></span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end dropdown-menu-right user-dd animated flipInY">
-                                <a class="dropdown-item" href="/"><i data-feather="credit-card"
-                                        class="svg-icon me-2 ms-1"></i>
-                                    Home</a>
-                                <a class="dropdown-item" href="/admin"><i data-feather="mail"
+                                <a class="dropdown-item" href="/admin"><i data-feather="clipboard"
                                         class="svg-icon me-2 ms-1"></i>
                                     Panel</a>
+                                    <a class="dropdown-item" href="/admin"><i data-feather="settings"
+                                        class="svg-icon me-2 ms-1"></i>
+                                    Contraseña</a>
                                 <div class="dropdown-divider"></div>
                                 <form action="/logout" method="POST" class="d-flex" role="search">
                                     @csrf
@@ -124,59 +153,110 @@
                                     class="hide-menu">Dashboard</span></a></li>
                         
                         <li class="list-divider"></li>
+                        <?php
+                        $resEnv = App\Models\GruposUsuarios::permisosGrupo(session('rol'), 'env');
+                        $resmodEnv = App\Models\GruposUsuarios::permisosGrupo(session('rol'), 'modEnv');
+                        $resuser = App\Models\GruposUsuarios::permisosGrupo(session('rol'), 'user');
+                        $resmodUser = App\Models\GruposUsuarios::permisosGrupo(session('rol'), 'modUser');
+                        $resestGlo = App\Models\GruposUsuarios::permisosGrupo(session('rol'), 'estGlo');
+                        $resgest = App\Models\GruposUsuarios::permisosGrupo(session('rol'), 'gest');
+                        $resgestGlo = App\Models\GruposUsuarios::permisosGrupo(session('rol'), 'gestGlo');
+                        ?>
+                        @if ($resEnv != 'N' or $resmodEnv != 'N' or $resuser != 'N' or $resmodUser != 'N' or $resestGlo != 'N' or $resgest != 'N')
                         <li class="nav-small-cap"><span class="hide-menu">Acciones</span></li>
+                        @endif
+                        @if ($resEnv == 'Y')
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)"
-                                aria-expanded="false"><i data-feather="package" class="feather-icon"></i><span
-                                    class="hide-menu">Paquetes </span></a>
+                                aria-expanded="false"><i data-feather="send" class="feather-icon"></i><span
+                                    class="hide-menu">Envíos </span></a>
                             <ul aria-expanded="false" class="collapse  first-level base-level-line">
-                                <li class="sidebar-item"><a href="http://127.0.0.1:8000/admin/ver-cursos" class="sidebar-link"><span
-                                            class="hide-menu"> Ver Cursos
+                                <li class="sidebar-item"><a href="/admin/envio" class="sidebar-link"><span
+                                            class="hide-menu"> Hacer un envío
                                         </span></a>
                                 </li>
-                                <li class="sidebar-item"><a href="http://127.0.0.1:8000/admin/acciones-cursos" class="sidebar-link"><span
-                                            class="hide-menu"> Acciones
+                                <li class="sidebar-item"><a href="/admin/mis-envios" class="sidebar-link"><span
+                                            class="hide-menu"> Mis envíos
                                         </span></a>
                                 </li>
                             </ul>
                         </li>
+                        @endif
+                        @if ($resmodEnv == 'Y')
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                aria-expanded="false"><i data-feather="edit-2" class="feather-icon"></i><span
+                                    class="hide-menu">Modificar envío </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level base-level-line">
+                                <li class="sidebar-item"><a href="/admin/modificar-envio" class="sidebar-link"><span
+                                            class="hide-menu"> Modificar
+                                        </span></a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endif
+                        @if ($resuser == 'Y')
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)"
                                 aria-expanded="false"><i data-feather="users" class="feather-icon"></i><span
                                     class="hide-menu">Usuarios </span></a>
                             <ul aria-expanded="false" class="collapse  first-level base-level-line">
-                                <li class="sidebar-item"><a href="http://127.0.0.1:8000/admin/grupos" class="sidebar-link"><span
+                                <li class="sidebar-item"><a href="/admin/grupos" class="sidebar-link"><span
                                     class="hide-menu"> Grupos de Usuarios
                                 </span></a>
                                 </li>
-                                <li class="sidebar-item"><a href="http://127.0.0.1:8000/admin/add-usuarios" class="sidebar-link"><span
+                                <li class="sidebar-item"><a href="/admin/add-usuarios" class="sidebar-link"><span
                                             class="hide-menu"> Crear Usuarios
                                         </span></a>
                                 </li>
-                                <li class="sidebar-item"><a href="http://127.0.0.1:8000/admin/add-usuarios" class="sidebar-link"><span
+                            </ul>
+                        </li>
+                        @endif
+                        @if ($resmodUser == 'Y')
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                aria-expanded="false"><i data-feather="user" class="feather-icon"></i><span
+                                    class="hide-menu">Actualizar Usuario </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level base-level-line">
+                                <li class="sidebar-item"><a href="/admin/mod-user" class="sidebar-link"><span
                                     class="hide-menu"> Modificar Usuarios
                                 </span></a>
                                 </li>
                             </ul>
                         </li>
+                        @endif
+                        @if ($resgest == 'Y')
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                aria-expanded="false"><i data-feather="layers" class="feather-icon"></i><span
+                                    class="hide-menu">Gestión de Paquetes </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level base-level-line">
+                                <li class="sidebar-item"><a href="/admin/gest-paquete" class="sidebar-link"><span
+                                            class="hide-menu"> Gestionar
+                                        </span></a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endif
+                        @if (session('rol') == 1)
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)"
                                 aria-expanded="false"><i data-feather="hash" class="feather-icon"></i><span
                                     class="hide-menu">Códigos </span></a>
                             <ul aria-expanded="false" class="collapse  first-level base-level-line">
-                                <li class="sidebar-item"><a href="http://127.0.0.1:8000/admin/capitulos-acciones" class="sidebar-link"><span
-                                            class="hide-menu"> Acciones
+                                <li class="sidebar-item"><a href="/admin/codigos" class="sidebar-link"><span
+                                            class="hide-menu"> Impresión
                                         </span></a>
                                 </li>
                             </ul>
                         </li>
+                        @endif
+                        {{-- @if ($resestGlo == 'Y')
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)"
-                                aria-expanded="false"><i data-feather="bar-chart" class="feather-icon"></i><span
-                                    class="hide-menu">Estadísticas </span></a>
+                                aria-expanded="false"><i data-feather="pie-chart" class="feather-icon"></i><span
+                                    class="hide-menu">Estadísticas Globales</span></a>
                             <ul aria-expanded="false" class="collapse  first-level base-level-line">
-                                <li class="sidebar-item"><a href="http://127.0.0.1:8000/admin/capitulos-acciones" class="sidebar-link"><span
-                                            class="hide-menu"> Acciones
+                                <li class="sidebar-item"><a href="http://127.0.0.1:8000/admin/glob-stats" class="sidebar-link"><span
+                                            class="hide-menu"> Sucursales
                                         </span></a>
                                 </li>
                             </ul>
                         </li>
+                        @endif --}}
                     </ul>
                 </nav>
                 <!-- End Sidebar navigation -->
@@ -246,9 +326,10 @@
     <!-- ============================================================== -->
     <!-- All Jquery -->
     <!-- ============================================================== -->
-    <script src="{{ URL::asset('js/jquery.min.js'); }}"></script>
     <script src="{{ URL::asset('js/bootstrap.js'); }}"></script>
     <script src="{{ URL::asset('js/bootstrap.min.js'); }}"></script>
+    
+
     
     <!-- apps -->
     <!-- apps -->

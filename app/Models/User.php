@@ -5,6 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Pagination\Paginator;
+use App\Models\GruposUsuarios;
 use Illuminate\Notifications\Notifiable;
 
 
@@ -60,6 +62,22 @@ class User extends Authenticatable
         return User::where('email', $email)->first();
     }
 
+    public static function usuariosPorSucursal($id_sucursal)
+    {
+        Paginator::useBootstrap();
+        $usuarios = User::where('id_sucursal', $id_sucursal)->paginate(20);
+        return $usuarios;
+    }
+
+
+    public static function usuariosPorRol($id_rol)
+    {
+        Paginator::useBootstrap();
+        $usuarios = User::where('id_rol_usuarios', $id_rol)->paginate(20);
+        return $usuarios;
+    }
+
+
     public function obtenerSucursal($id)
     {
         $encontrado = User::select('users.id','sucursal.nombreSucursal')
@@ -79,29 +97,18 @@ class User extends Authenticatable
         User::destroy($id);
     }
 
+    public static function getSucursal($id_user)
+    {
+        $encontrado = User::find($id_user);
+        return $encontrado->id_sucursal;
+    }
+
     public function cambiarUsuariosABasicos($idGrupo)
     {
         User::where('id_rol_usuarios', $idGrupo)
             ->update(['id_rol_usuarios' => 4]);
     }
 
-    public function updatePorIdAdmin($id, $nombre, $email)
-    {
-        $usuario = User::find($id);
-        $usuario->name = $nombre;
-        $usuario->email = $email;
-        $usuario->id_rol = 1;
-        $usuario->save();
-    }
-
-    public function updatePorIdUsuario($id, $nombre, $email)
-    {
-        $usuario = User::find($id);
-        $usuario->name = $nombre;
-        $usuario->email = $email;
-        $usuario->id_rol = 2;
-        $usuario->save();
-    }
 
     public function crear(User $obj)
     {
@@ -124,5 +131,117 @@ class User extends Authenticatable
         $usuariosN = User::where('id_rol', 2)->get();
         return $usuariosN->count();
     }
+
+    public static function validacionDePamSucursal($id_sucursal)
+    {
+        //Validando si en la sucursal hay gestor de paquetes
+        $gestores = GruposUsuarios::gruposConGestor();
+        foreach ($gestores as $gestor)
+        {
+            $sucursalValida = User::where([
+                ['id_sucursal', '=', $id_sucursal],
+                ['id_rol_usuarios', '=', $gestor->id]])->get();
+            if (count($sucursalValida) != 0)
+            {
+                return true;
+            }
+
+        }
+        return false;
+
+    }
+
+    public static function pamsSucursal($id)
+    {
+        return User::join('rol_usuarios','users.id_rol_usuarios','=','rol_usuarios.id')
+        ->join('sucursal','users.id_sucursal','=','sucursal.id')
+        ->select('users.*')
+            ->where([['users.id_sucursal','=', $id],
+            ['rol_usuarios.gestionarPaquetes','=','Y']])->get();
+    }
+
+
+    public static function validacionPamSucursal($id)
+    {
+        $encontrados = User::join('rol_usuarios','users.id_rol_usuarios','=','rol_usuarios.id')
+        ->join('sucursal','users.id_sucursal','=','sucursal.id')
+        ->select('users.*')
+            ->where([['users.id_sucursal','=', $id],
+            ['rol_usuarios.gestionarPaquetes','=','Y']])->get();
+        if (count($encontrados) > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+    public static function validacionEmailUser($email)
+    {
+        $encontrado = User::where('email','=',$email)->first();
+        if ($encontrado)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    public static function validacionEmailUserMod($email,$id)
+    {
+        $encontrado = User::where([['email','=',$email],['id','!=', $id]])->first();
+        if ($encontrado)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    public static function usuariosTotales()
+    {
+        $resultado = User::get();
+        return count($resultado);
+    }
+
+    public static function adminsTotales()
+    {
+        $resultado = User::where('id_rol_usuarios','=',1)->get();
+        return count($resultado);
+    }
+
+    public static function userEstadisticas()
+    {
+        $resultado = User::join('rol_usuarios','users.id_rol_usuarios','=','rol_usuarios.id')
+                                ->where('rol_usuarios.verEstadisticasGlobales','=','Y')->get();
+        return count($resultado);
+    }
+
+    public static function nombreApellido($id)
+    {
+        $encontrado = User::find($id);
+        $resultado = $encontrado->primerNombre.' '.$encontrado->primerApellido;
+        return $resultado;
+    }
+
+    public static function destinatarioEntrante($id)
+    {
+        return User::find($id);
+    }
+
+    public static function destinatario($id)
+    {
+        return User::join('sucursal','users.id_sucursal','=','sucursal.id')
+        ->select('users.primerNombre','users.segundoNombre','users.primerApellido','users.segundoApellido','users.apellidoCasada','sucursal.nombreSucursal')->find($id);
+    }
+
+
 }
 

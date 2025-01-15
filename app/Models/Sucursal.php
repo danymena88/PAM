@@ -21,4 +21,29 @@ class Sucursal extends Model
     {
         return Sucursal::orderBy('created_at', 'desc')->get();
     }
+
+    public static function nombreDeSucursal($id)
+    {
+        $suc = Sucursal::find($id);
+        return $suc->nombreSucursal;
+    }
+
+    public static function obtenerCodigo($id)
+    {
+        $find = Sucursal::find($id);
+        return $find->codigoSucursal;
+    }
+
+    public static function fragmento($id_sucursal)
+    {
+        $obj = Sucursal::find($id_sucursal);
+        return substr($obj->codigoSucursal,0,6);
+    }
+
+    public static function sucursalDestinatario($id)
+    {
+        $encontrado = Sucursal::find($id);
+        return $encontrado->nombreSucursal;
+    }
+
 }

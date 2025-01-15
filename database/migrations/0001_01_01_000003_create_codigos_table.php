@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('codigo', 50);
             $table->enum('disponible', ['Y', 'N']);
             $table->enum('impreso', ['Y', 'N']);
+            $table->timestamps();
         });
     }
 
