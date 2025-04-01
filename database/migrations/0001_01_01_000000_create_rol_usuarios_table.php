@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('descripcion', 100)->nullable(false);
             $table->enum('hacerEnvios', ['Y', 'N']);
             $table->enum('modificarPaquetes', ['Y', 'N']);
-            $table->enum('verEstadisticasGlobales', ['Y', 'N']);
+            $table->enum('busquedas', ['Y', 'N']);
             $table->enum('crearUsuarios', ['Y', 'N']);
             $table->enum('gestionarPaquetes', ['Y', 'N']);
             $table->enum('modificarUsuarios', ['Y', 'N']);

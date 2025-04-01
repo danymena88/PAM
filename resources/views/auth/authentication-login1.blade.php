@@ -46,13 +46,88 @@
                 <div class="col-lg-5 col-md-7 bg-white">
                     <div class="p-3">
                         <div class="text-center">
-                            <img src="images/big/icon.png" alt="wrapkit">
+                            <img src="{{ URL::asset('images/logo.png'); }}" class="img-fluid" style="max-width:180px;">
                         </div>
-                        <h2 class="mt-3 text-center">TrackLog</h2>
                         <p class="text-center">Ingresa tu usuario y contraseña.</p>
                         <form class="mt-4" action="/login" method="POST">
                             @csrf
                             <div class="row">
+                                @if (session('resultado') == 'incorrecta')
+                                <div class="col-lg-12">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label text-dark" for="uname">Email</label>
+                                        <input class="form-control" id="uname" type="text" name="email"
+                                            placeholder="ingresa tu correo...">
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label text-dark" for="pwd">Contraseña</label>
+                                        <input class="form-control is-invalid" id="pwd" type="password" name="password"
+                                            placeholder="ingresa tu contraseña...">
+                                            <div class="invalid-feedback">
+                                                Contraseña incorrecta, inténtalo de nuevo... 
+                                            </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 text-center">
+                                    <button type="submit" class="btn w-100 btn-dark">Ingresar</button>
+                                </div>
+                                <div class="col-lg-12 text-center mt-5">
+                                    Aún no tienes cuenta? <a href="http://127.0.0.1:8000/register" class="text-danger">Regístrate</a>
+                                </div>
+                                @elseif (session('resultado') == 'noEncontrado')
+                                <div class="col-lg-12">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label text-dark" for="uname">Email</label>
+                                        <input class="form-control is-invalid" id="uname" type="text" name="email"
+                                            placeholder="ingresa tu correo...">
+                                            <div class="invalid-feedback">
+                                                Usuario no encontrado, inténtalo de nuevo... 
+                                            </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label text-dark" for="pwd">Contraseña</label>
+                                        <input class="form-control" id="pwd" type="password" name="password"
+                                            placeholder="ingresa tu contraseña...">
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 text-center">
+                                    <button type="submit" class="btn w-100 btn-dark">Ingresar</button>
+                                </div>
+                                <div class="col-lg-12 text-center mt-5">
+                                    Aún no tienes cuenta? <a href="http://127.0.0.1:8000/register" class="text-danger">Regístrate</a>
+                                </div>
+                                @elseif (session('resultado') == 'completeCampos')
+                                <div class="col-lg-12">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label text-dark" for="uname">Email</label>
+                                        <input class="form-control is-invalid" id="uname" type="text" name="email"
+                                            placeholder="ingresa tu correo...">
+                                            <div class="invalid-feedback">
+                                                Debes ingresar tu correo... 
+                                            </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label text-dark" for="pwd">Contraseña</label>
+                                        <input class="form-control is-invalid" id="pwd" type="password" name="password"
+                                            placeholder="ingresa tu contraseña...">
+                                            <div class="invalid-feedback">
+                                                Debes ingresar tu contraseña...
+                                            </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 text-center">
+                                    <button type="submit" class="btn w-100 btn-dark">Ingresar</button>
+                                </div>
+                                <div class="col-lg-12 text-center mt-5">
+                                    Aún no tienes cuenta? <a href="http://127.0.0.1:8000/register" class="text-danger">Regístrate</a>
+                                </div>
+                                @else
                                 <div class="col-lg-12">
                                     <div class="form-group mb-3">
                                         <label class="form-label text-dark" for="uname">Email</label>
@@ -73,6 +148,7 @@
                                 <div class="col-lg-12 text-center mt-5">
                                     Aún no tienes cuenta? <a href="http://127.0.0.1:8000/register" class="text-danger">Regístrate</a>
                                 </div>
+                                @endif
                             </div>
                         </form>
                     </div>

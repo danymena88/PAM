@@ -166,6 +166,19 @@
                                 }
                             });
                         });
+                        $(document).on('click', '.pagination a', function(event){
+                            event.preventDefault();
+                            var page = $(this).attr('href').split('page=')[1];
+                            var query = $('#search').val();
+                            $.ajax({
+                                url: "/admin/search-envio" + "?page=" + page,
+                                type: "GET",
+                                data:{'search' : query},
+                                success:function(data){
+                                    $('#search_list').html(data);
+                                }
+                            });
+                        });
                     });
 
                     function enviouser(query) {

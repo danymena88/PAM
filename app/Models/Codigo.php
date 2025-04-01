@@ -61,6 +61,13 @@ class Codigo extends Model
         $codigo->save();
     }
 
+    public static function disponibleSi($id)
+    {
+        $codigo = Codigo::find($id);
+        $codigo->disponible = 'Y';
+        $codigo->save();
+    }
+
     public static function codigosDeSucursal($cod)
     {
         return Codigo::where('codigo','LIKE', $cod.'%')->get();
@@ -69,5 +76,15 @@ class Codigo extends Model
     public static function codigoPorId($id)
     {
         return Codigo::find($id);
+    }
+
+    public static function codigosImpresion($codigo)
+    {
+        return Codigo::where([['codigo','LIKE', $codigo.'%'],['disponible','=','Y'],['impreso','=','N']])->get();
+    }
+
+    public static function codigosYaImpresos($codigo)
+    {
+        Codigo::where([['codigo','LIKE', $codigo.'%'],['disponible','=','Y'],['impreso','=','N']])->update(['impreso' => 'Y']);
     }
 }

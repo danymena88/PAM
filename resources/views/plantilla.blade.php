@@ -52,8 +52,7 @@
                     <div class="navbar-brand">
                         <!-- Logo icon -->
                         <a href="/">
-                            {{-- <img src="{{ URL::asset('images/logo.png'); }}" class="img-fluid" style="max-width:180px;"> --}}
-                            <span style="font-size: 30px; color: gray; margin-bottom: 0;">TrackLog</span>
+                            <img src="{{ URL::asset('images/logo.png'); }}" class="img-fluid" style="max-width:180px;">
                         </a>
                     </div>
                     <!-- ============================================================== -->
@@ -82,7 +81,7 @@
                             <a class="dropdown-item" href="/admin"><i data-feather="clipboard"
                                     class="svg-icon me-2 ms-1"></i>
                                 Panel</a>
-                                <a class="dropdown-item" href="/admin"><i data-feather="settings"
+                                <a href="/admin/cambio-contra" class="dropdown-item"><i data-feather="settings"
                                     class="svg-icon me-2 ms-1"></i>
                                 Contraseña</a>
                                 <div class="dropdown-divider"></div>
@@ -118,7 +117,7 @@
                                 <a class="dropdown-item" href="/admin"><i data-feather="clipboard"
                                         class="svg-icon me-2 ms-1"></i>
                                     Panel</a>
-                                    <a class="dropdown-item" href="/admin"><i data-feather="settings"
+                                    <a href="/admin/cambio-contra" class="dropdown-item"><i data-feather="settings"
                                         class="svg-icon me-2 ms-1"></i>
                                     Contraseña</a>
                                 <div class="dropdown-divider"></div>
@@ -221,6 +220,18 @@
                             </ul>
                         </li>
                         @endif
+                        @if ($resestGlo == 'Y')
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                aria-expanded="false"><i data-feather="search" class="feather-icon"></i><span
+                                    class="hide-menu">Busquedas </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level base-level-line">
+                                <li class="sidebar-item"><a href="/admin/busquedas" class="sidebar-link"><span
+                                    class="hide-menu"> Buscar Envíos
+                                </span></a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endif
                         @if ($resgest == 'Y')
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)"
                                 aria-expanded="false"><i data-feather="layers" class="feather-icon"></i><span
@@ -291,6 +302,8 @@
                     </div>
                 </div>
             </div>
+
+            
             <!-- ============================================================== -->
             <!-- End Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
@@ -319,13 +332,24 @@
         <!-- End Page wrapper  -->
         <!-- ============================================================== -->
     </div>
-    <!-- ============================================================== -->
-    <!-- End Wrapper -->
-    <!-- ============================================================== -->
-    <!-- End Wrapper -->
-    <!-- ============================================================== -->
-    <!-- All Jquery -->
-    <!-- ============================================================== -->
+    
+    {{-- <script>
+        
+        
+
+
+function cambioContrasena() {
+                        let inputEn = $('#inp');
+                    $.ajax({
+                        url: "/admin/cambio-contra",
+                        type: "GET",
+                        data:{'con' : inputEn.val()},
+                        success:function(data){
+                            $('#nuevo-form').html(data);
+                        }
+                    });
+                };
+    </script> --}}
     <script src="{{ URL::asset('js/bootstrap.js'); }}"></script>
     <script src="{{ URL::asset('js/bootstrap.min.js'); }}"></script>
     

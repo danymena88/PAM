@@ -17,7 +17,7 @@ class GruposUsuarios extends Model
         'descripcion',
         'hacerEnvios', 
         'modificarPaquetes', 
-        'verEstadisticasGlobales', 
+        'busquedas', 
         'crearUsuarios',
         'gestionarPaquetes',
         'modificarUsuarios'
@@ -107,7 +107,7 @@ class GruposUsuarios extends Model
                 break;
             case 'estGlo':
                 $grupo = GruposUsuarios::find($id_rol);
-                if ($grupo->verEstadisticasGlobales == 'Y'){
+                if ($grupo->busquedas == 'Y'){
                     return 'Y';
                 }else {
                     return 'N';

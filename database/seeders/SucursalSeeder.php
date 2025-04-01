@@ -44,5 +44,50 @@ class SucursalSeeder extends Seeder
             'created_at' => date("Y-m-d H:i:s"),
             'updated_at' => date("Y-m-d H:i:s")
         ]);
+
+
+
+
+
+
+
+        Sucursal::insert([
+            'nombreSucursal' => 'Sucursal 29 Calle',
+            'codigoSucursal' => 'S29001',
+            'created_at' => date("Y-m-d H:i:s"),
+            'updated_at' => date("Y-m-d H:i:s")
+        ]);
+
+
+        Sucursal::insert([
+            'nombreSucursal' => 'Sucursal San Miguel',
+            'codigoSucursal' => 'SSM001',
+            'created_at' => date("Y-m-d H:i:s"),
+            'updated_at' => date("Y-m-d H:i:s")
+        ]);
+
+
+        Sucursal::insert([
+            'nombreSucursal' => 'Sucursal San Vicente',
+            'codigoSucursal' => 'SSV001',
+            'created_at' => date("Y-m-d H:i:s"),
+            'updated_at' => date("Y-m-d H:i:s")
+        ]);
+
+
+        Sucursal::insert([
+            'nombreSucursal' => 'Sucursal Sonsonate 2',
+            'codigoSucursal' => 'SSO002',
+            'created_at' => date("Y-m-d H:i:s"),
+            'updated_at' => date("Y-m-d H:i:s")
+        ]);
+
+
+        Sucursal::insert([
+            'nombreSucursal' => 'Sucursal San Salvador',
+            'codigoSucursal' => 'SSS001',
+            'created_at' => date("Y-m-d H:i:s"),
+            'updated_at' => date("Y-m-d H:i:s")
+        ]);
     }
 }

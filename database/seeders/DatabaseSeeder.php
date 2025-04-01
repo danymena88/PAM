@@ -17,5 +17,7 @@ class DatabaseSeeder extends Seeder
         SucursalSeeder::run();
         UserSeeder::run();
         CodigosSeeder::run();
+        PaqueteSeeder::run();
+        EnvioSeeder::run();
     }
 }

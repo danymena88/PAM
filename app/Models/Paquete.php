@@ -24,4 +24,10 @@ class Paquete extends Model
         $des = Paquete::find($id);
         return $des->descripcionPaquete;
     }
+
+    public static function sinDesc()
+    {
+        $des = Paquete::find(1);
+        return $des->id;
+    }
 }

@@ -115,7 +115,7 @@
                                                     @elseif($envio->aprobadoPamDestino == 'N' && $envio->aprobadoPamRemitente == 'Y')
                                                     <span class="badge rounded-pill text-bg-danger">En camino</span>
                                                     @else
-                                                    <a class="btn btn-success btn-rounded" href="admin/recibido?id={{$envio->id}}" style="font-size: 12px; padding: 3px 7px;"><i class="fas fa-check" style="margin-right:5px;"></i>Recibido</a>
+                                                    <a class="btn btn-success btn-rounded" href="admin/recibido?id={{$envio->id}}" style="font-size: 12px; padding: 3px 7px;"><i class="fas fa-check" style="margin-right:5px;"></i>Recibido?</a>
                                                     @endif
                                                 </td>
                                                 <td>

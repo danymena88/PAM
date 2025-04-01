@@ -220,7 +220,7 @@ class User extends Authenticatable
     public static function userEstadisticas()
     {
         $resultado = User::join('rol_usuarios','users.id_rol_usuarios','=','rol_usuarios.id')
-                                ->where('rol_usuarios.verEstadisticasGlobales','=','Y')->get();
+                                ->where('rol_usuarios.gestionarPaquetes','=','Y')->get();
         return count($resultado);
     }
 

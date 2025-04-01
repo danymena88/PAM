@@ -29,7 +29,7 @@ Route::post('/admin/addgrupo', [AdminController::class, 'nuevoGrupo'])->middlewa
 Route::get('/admin/eliminar-grupo/{id}', [AdminController::class, 'eliminarGrupo'])->middleware('auth');
 Route::get('/admin/modificar-grupo/{id}', [AdminController::class, 'modificarGrupo'])->middleware('auth');
 Route::post('/admin/modificar-grupo/updategrupo', [AdminController::class, 'updateGrupo'])->middleware('auth');
-Route::get('admin/search-g', [AdminController::class, 'searchg']);
+Route::get('/admin/search-g', [AdminController::class, 'searchg']);
 
 Route::get('/admin/envio', [AdminController::class, 'envio'])->middleware('auth');
 Route::get('/admin/mis-envios', [AdminController::class, 'misEnvios'])->middleware('auth');
@@ -56,13 +56,21 @@ Route::get('/admin/recibido', [AdminController::class, 'envioRecibido'])->middle
 Route::get('/admin/cambio-destinatario/{id_envio}', [AdminController::class, 'modDestinatario'])->middleware('auth');
 
 Route::get('/admin/codigos', [AdminController::class, 'codigos'])->middleware('auth');
+Route::get('/admin/impresion-codigos', [AdminController::class, 'impresionCodigos'])->middleware('auth');
+Route::get('admin/search-codigos', [AdminController::class, 'searchCodigos']);
+Route::get('/admin/ya-impresos', [AdminController::class, 'yaImpresos'])->middleware('auth');
 
+Route::post('/admin/verif-contra', [AdminController::class, 'verifContra'])->middleware('auth');
+Route::get('/admin/cambio-contra', [AdminController::class, 'cambioContra'])->middleware('auth');
 
+Route::get('/admin/busquedas', [AdminController::class, 'misBusquedas'])->middleware('auth');
 
+Route::get('admin/search-busquedas', [AdminController::class, 'busquedaParaBusquedas']);
+Route::get('admin/search-resultados', [AdminController::class, 'busquedaParaResultados']);
+Route::get('admin/get-descripcion2', [AdminController::class, 'getDescripcion2']);
 
-
-
-
+Route::get('/admin/search-saliente', [AdminController::class, 'searchSaliente'])->middleware('auth');
+Route::get('/admin/search-entrante', [AdminController::class, 'searchEntrante'])->middleware('auth');
 
 
 

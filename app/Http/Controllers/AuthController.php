@@ -45,16 +45,17 @@ class AuthController extends Controller
                     Auth::login($user);
                     return redirect('/admin');
                     
-                } 
-                
-                return redirect('/login')->with(['resultado' => "F"]);
+                }
+                else{
+                    return redirect('/login')->with(['resultado' => "incorrecta"]);
+                }
 
             }
 
-            return redirect('/login')->with(['resultado' => "N"]);
+            return redirect('/login')->with(['resultado' => "noEncontrado"]);
         }
         else{
-            return redirect('/login')->with(['resultado' => "Q"]);
+            return redirect('/login')->with(['resultado' => "completeCampos"]);
         }
     }
 

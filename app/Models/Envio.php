@@ -138,4 +138,66 @@ class Envio extends Model
                     ->select('users.primerNombre','users.segundoNombre','users.primerApellido','codigos.codigo','users.segundoApellido','users.apellidoCasada','sucursal.nombreSucursal','paquete.descripcionPaquete','envio.*')->find($id);
     }
 
+    public static function getEnviosDestTodos($id)
+    {
+        return Envio::join('users','envio.idDestinatario','=','users.id')
+        ->join('sucursal','envio.sucDestinatario','=','sucursal.id')
+        ->join('paquete','envio.idDescripcionPaquete','=','paquete.id')
+        ->join('codigos','envio.idCodigoPaquete','=','codigos.id')
+        ->select('users.primerNombre','users.segundoNombre','users.primerApellido','codigos.codigo','users.segundoApellido','users.apellidoCasada','sucursal.nombreSucursal','paquete.descripcionPaquete','envio.*')
+        ->where('envio.idDestinatario', $id)->orderBy('envio.created_at', 'desc')->get();
+    }
+
+    public static function getEnviosRemTodos($id)
+    {
+        return Envio::join('users','envio.idDestinatario','=','users.id')
+        ->join('sucursal','envio.sucDestinatario','=','sucursal.id')
+        ->join('paquete','envio.idDescripcionPaquete','=','paquete.id')
+        ->join('codigos','envio.idCodigoPaquete','=','codigos.id')
+        ->select('users.primerNombre','users.segundoNombre','users.primerApellido','codigos.codigo','users.segundoApellido','users.apellidoCasada','sucursal.nombreSucursal','paquete.descripcionPaquete','envio.*')
+        ->where('envio.idRemitente', $id)->orderBy('envio.created_at', 'desc')->get();
+    }
+
+    public static function getEnviosDestFecha($id,$fecha)
+    {
+        return Envio::join('users','envio.idDestinatario','=','users.id')
+        ->join('sucursal','envio.sucDestinatario','=','sucursal.id')
+        ->join('paquete','envio.idDescripcionPaquete','=','paquete.id')
+        ->join('codigos','envio.idCodigoPaquete','=','codigos.id')
+        ->select('users.primerNombre','users.segundoNombre','users.primerApellido','codigos.codigo','users.segundoApellido','users.apellidoCasada','sucursal.nombreSucursal','paquete.descripcionPaquete','envio.*')
+        ->where('envio.idDestinatario', $id)->whereDate('envio.created_at', $fecha)->orderBy('envio.created_at', 'desc')->get();
+    }
+
+    public static function getEnviosRemFecha($id,$fecha)
+    {
+        return Envio::join('users','envio.idDestinatario','=','users.id')
+        ->join('sucursal','envio.sucDestinatario','=','sucursal.id')
+        ->join('paquete','envio.idDescripcionPaquete','=','paquete.id')
+        ->join('codigos','envio.idCodigoPaquete','=','codigos.id')
+        ->select('users.primerNombre','users.segundoNombre','users.primerApellido','codigos.codigo','users.segundoApellido','users.apellidoCasada','sucursal.nombreSucursal','paquete.descripcionPaquete','envio.*')
+        ->where('envio.idRemitente', $id)->whereDate('envio.created_at', $fecha)->orderBy('envio.created_at', 'desc')->get();
+    }
+
+
+    public static function searchSalientes($id_sucursal,$query)
+    {
+        return Envio::join('users','envio.idRemitente','=','users.id')
+        ->join('sucursal','envio.sucRemitente','=','sucursal.id')
+        ->join('paquete','envio.idDescripcionPaquete','=','paquete.id')
+        ->join('codigos','envio.idCodigoPaquete','=','codigos.id')
+        ->select('users.primerNombre','users.segundoNombre','codigos.codigo','users.primerApellido','users.segundoApellido','users.apellidoCasada','sucursal.nombreSucursal','paquete.descripcionPaquete','envio.*')
+        ->where([['aprobadoPamRemitente','=','N'],['anulado','=','N'],['sucRemitente','=',$id_sucursal],['codigos.codigo','LIKE', $query.'%']])->orderBy('id','asc')->get();
+    }
+
+    public static function searchEntrantes($id_sucursal,$query)
+    {
+        return Envio::join('users','envio.idDestinatario','=','users.id')
+        ->join('sucursal','envio.sucDestinatario','=','sucursal.id')
+        ->join('paquete','envio.idDescripcionPaquete','=','paquete.id')
+        ->join('codigos','envio.idCodigoPaquete','=','codigos.id')
+        ->select('users.primerNombre','users.segundoNombre','codigos.codigo','users.primerApellido','users.segundoApellido','users.apellidoCasada','sucursal.nombreSucursal','paquete.descripcionPaquete','envio.*')
+        ->where([['aprobadoPamDestino','=','N'],['aprobadoPamRemitente','=','Y'],['sucDestinatario','=',$id_sucursal],['codigos.codigo','LIKE', $query.'%']])->orderBy('id','asc')->get();
+    }
+
+
 }

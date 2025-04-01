@@ -11,7 +11,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <h4 class="card-title">Nuevo Grupo</h4>
-                                    <form action="addgrupo" method="POST">
+                                    <form action="/admin/addgrupo" method="POST">
                                         @csrf
                                         <div class="form-body">
                                             <div class="form-group mb-3 mt-4 row">
@@ -63,7 +63,7 @@
                                                                 <label class="btn btn-dark mb-2 rounded-pill">
                                                                     <div class="custom-control custom-checkbox mr-sm-2">
                                                                         <input type="checkbox" class="custom-control-input" name="statglobales">
-                                                                        <label class="custom-control-label" for="checkbox1">Ver estadísticas globales</label>
+                                                                        <label class="custom-control-label" for="checkbox1">Búsquedas</label>
                                                                     </div>
                                                                 </label>
                                                                 <label class="btn btn-dark mb-2 rounded-pill">
@@ -114,7 +114,7 @@
                                                 <th>modificar envios?</th>
                                                 <th>crear usuarios?</th>
                                                 <th>modificar usuarios?</th>
-                                                <th>estadísticas globales?</th>
+                                                <th>Búsquedas?</th>
                                                 <th>gestión paquetes?</th>
                                                 <th>Eliminar</th>
                                             </tr>
@@ -149,7 +149,7 @@
                                                 @else
                                                     <i data-feather="check-square" class="feather-icon me-3" style="color:#e8e6e6"></i>
                                                 @endif</td>
-                                                <td>@if ($grupo->verEstadisticasGlobales == 'Y')
+                                                <td>@if ($grupo->busquedas == 'Y')
                                                     <i data-feather="check-square" class="feather-icon me-3" style="color:green"></i>
                                                 @else
                                                     <i data-feather="check-square" class="feather-icon me-3" style="color:#e8e6e6"></i>
@@ -203,7 +203,7 @@
                                 <h4 class="card-title">Modificar Grupo</h4>
                                 @if ($modmod == true)
                                 <div class="row">
-                                    <form action="updategrupo" method="POST">
+                                    <form action="/admin/modificar-grupo/updategrupo" method="POST">
                                         @csrf
                                         <div class="form-body">
                                             <div class="form-group mb-3 mt-4 row">
@@ -267,12 +267,12 @@
                                                             <div class="btn-group d-flex flex-column w-75 align-items-center" data-bs-toggle="buttons">
                                                                 <label class="btn btn-dark mb-2 rounded-pill">
                                                                     <div class="custom-control custom-checkbox mr-sm-2">
-                                                                        @if ($modGrupo->verEstadisticasGlobales == 'Y')
+                                                                        @if ($modGrupo->busquedas == 'Y')
                                                                         <input type="checkbox" class="custom-control-input" name="statglobales" checked>
                                                                         @else
                                                                         <input type="checkbox" class="custom-control-input" name="statglobales">
                                                                         @endif
-                                                                        <label class="custom-control-label" for="checkbox1">Ver estadísticas globales</label>
+                                                                        <label class="custom-control-label" for="checkbox1">Búsquedas</label>
                                                                     </div>
                                                                 </label>
                                                                 <label class="btn btn-dark mb-2 rounded-pill">
@@ -363,7 +363,7 @@
                                                                 <label class="btn btn-dark mb-2 rounded-pill">
                                                                     <div class="custom-control custom-checkbox mr-sm-2">
                                                                         <input type="checkbox" disabled class="custom-control-input" name="statglobales">
-                                                                        <label class="custom-control-label" for="checkbox1">Ver estadísticas globales</label>
+                                                                        <label class="custom-control-label" for="checkbox1">Búsquedas</label>
                                                                     </div>
                                                                 </label>
                                                                 <label class="btn btn-dark mb-2 rounded-pill">
@@ -489,7 +489,7 @@
                         $("input[name='radiobutton']").click(function(){
                             var query = $(this).val();
                             $.ajax({
-                                url: "search-g",
+                                url: "/admin/search-g",
                                type: "GET",
                                 data:{'search' : query},
                                 success:function(data){
@@ -508,7 +508,7 @@
                     function product(page){
                         var num = $('input[name=radiobutton]:checked', '#myForm').val();
                         $.ajax({
-                            url: "search-g",
+                            url: "/admin/search-g",
                             type: "GET",
                             data:{'page' : page, 'search' : num},
                             success:function(data){

@@ -66,7 +66,7 @@ class AdminController extends Controller
             'descripcion' => $request->post('descripcion'),
             'hacerEnvios' => $request->post('envios') == 'on' ? 'Y' : 'N',
             'modificarPaquetes'=> $request->post('modenvios') == 'on' ? 'Y' : 'N', 
-            'verEstadisticasGlobales'=> $request->post('statglobales') == 'on' ? 'Y' : 'N', 
+            'busquedas'=> $request->post('statglobales') == 'on' ? 'Y' : 'N', 
             'crearUsuarios'=> $request->post('usuarios') == 'on' ? 'Y' : 'N',
             'gestionarPaquetes'=> $request->post('paqsucursal') == 'on' ? 'Y' : 'N',
             'modificarUsuarios'=> $request->post('modusuarios') == 'on' ? 'Y' : 'N'
@@ -139,7 +139,7 @@ class AdminController extends Controller
         $grupo->descripcion = $request->post('descripcion');
         $grupo->hacerEnvios = $request->post('envios') == 'on' ? 'Y' : 'N';
         $grupo->modificarPaquetes = $request->post('modenvios') == 'on' ? 'Y' : 'N';
-        $grupo->verEstadisticasGlobales = $request->post('statglobales') == 'on' ? 'Y' : 'N';
+        $grupo->busquedas = $request->post('statglobales') == 'on' ? 'Y' : 'N';
         $grupo->crearUsuarios = $request->post('usuarios') == 'on' ? 'Y' : 'N';
         $grupo->gestionarPaquetes = $request->post('paqsucursal') == 'on' ? 'Y' : 'N';
         $grupo->modificarUsuarios = $request->post('modusuarios') == 'on' ? 'Y' : 'N';
@@ -628,6 +628,7 @@ class AdminController extends Controller
                         'idDestinatario' => $request->get('id_destinatario'),
                         'sucDestinatario' => User::getSucursal($request->get('id_destinatario')),
                         'sucRemitente' => Session::get('sucursalId'), 
+                        'idDescripcionPaquete'=> Paquete::sinDesc(),
                         'idCodigoPaquete'=> $modCodigo->id,
                         'anulado' => 'N',
                         'aprobadoPamRemitente' => 'N',
@@ -636,6 +637,7 @@ class AdminController extends Controller
                     ]);
                     $nuevoEnvio->save();
                     $modCodigo->disponible = 'N';
+                    $modCodigo->impreso = 'N';
                     $modCodigo->save();
                     return redirect('/admin/envio')->with(['resultado' => "S"]);
                 }
@@ -662,6 +664,16 @@ class AdminController extends Controller
         $variable = Session::get('rol');
         $mifecha = $this->fecha();
         return view('admin.admin-misenvios', ['fecha' => $mifecha, 'misEnvios' => Envio::enviosTerminadosJoin(Session::get('user_id'))]);
+    }
+
+    public function misBusquedas()
+    {
+        $variable = Session::get('rol');
+        $mifecha = $this->fecha();
+        $recientes = Envio::recientesPorUsuario(Session::get('user_id'));
+        $todasSucursales = new Sucursal;
+        $sucursales = $todasSucursales->obtenerTodos();
+        return view('admin.admin-busquedas', ['fecha' => $mifecha, 'enviosRecientes' => $recientes]);
     }
 
     public function modEnvio()
@@ -704,6 +716,22 @@ class AdminController extends Controller
         return $output;
     }
 
+
+    public function getDescripcion2(Request $request)
+    {
+        $envio = Envio::getEnvioModal($request->get('id'));
+        $destinatario = User::destinatarioEntrante($request->get('de'));
+        $output = '<div class="d-flex flex-row align-items-center justify-content-center bg-light pt-4 mb-3"><div class="d-flex flex-column justify-content-center align-items-center w-50 position-relative"><img src="/images/dashboard/profile-pic.jpg" alt="user" class="rounded-circle mb-3" width="45" height="45"><p class="text-dark font-16 font-weight-medium"><b>'.$envio->primerNombre.' '.$envio->primerApellido.'</b></p><div style="position:absolute; right:-10%;"><img src="/images/arrow-right-circle.svg" style="width:40px; height: 40px;"></div></div><div class="d-flex flex-column justify-content-center align-items-center w-50"><img src="/images/dashboard/profile-pic.jpg" alt="user" class="rounded-circle mb-3" width="45" height="45"><p class="text-dark font-16 font-weight-medium"><b>'.$destinatario->primerNombre.' '.$destinatario->primerApellido.'</b></p></div></div>
+                                <div><div class="input-group mb-3 d-flex flex-column justify-content-center align-items-center"><p class="fs-3">'.$envio->codigo.'</p><p class="m-0">Descripción del paquete...</p> 
+                                  <textarea maxlength="149" name="descripcion" class="form-control w-100" rows="3" placeholder="Descripción del paquete..." style="height: 164px;" disabled>'.$envio->descripcionPaquete.'</textarea></div>
+                                  <input type="text" name="envioId" value="'.$envio->id.'" hidden>
+                                  <input type="text" name="codigoId" value="'.$envio->idCodigoPaquete.'" hidden>
+                        <div class="modal-footer">
+                            <button class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
+                        </div></div>';
+        return $output;
+    }
+
     public function getAnular(Request $request)
     {
         $envio = Envio::getEnvioModal($request->get('id'));
@@ -723,7 +751,6 @@ class AdminController extends Controller
         $envio = Envio::getEnvio($request->get('envioId'));
         $envio->aprobadoPamRemitente = 'Y';
         $envio->save();
-        Codigo::impresoNo($request->get('codigoId'));
         return redirect('/admin/gest-paquete')->with(['resultado' => "S"]);
     }
 
@@ -763,6 +790,7 @@ class AdminController extends Controller
         $envio = Envio::getEnvio($request->get('id'));
         $envio->recibidoDestinatario = 'Y';
         $envio->fechaRecibido = $this->fechaYhora();
+        Codigo::disponibleSi($envio->idCodigoPaquete);
         $envio->save();
         return redirect('/admin');
     }
@@ -863,10 +891,523 @@ class AdminController extends Controller
         $grupos = new GruposUsuarios;
         $todasSucursales = new Sucursal;
         $sucursales = $todasSucursales->obtenerTodos();
-        return view('admin.admin-codigos', ['fecha' => $mifecha, 'sucursales' => $sucursales, 'listaCodigos' => Codigo::codigosDeSucursal('OSA')]);
+        return view('admin.admin-codigos', ['fecha' => $mifecha, 'sucursales' => $sucursales, 'listaCodigos' => Codigo::codigosDeSucursal($sucursales[0]->codigoSucursal)]);
         
     }
 
+    public function impresionCodigos(Request $request)
+    {
+        $codigo = Sucursal::obtenerCodigo($request->get('id_suc'));
+        return view('admin.admin-codigosImpresion', ['listaCodigos' => Codigo::codigosImpresion($codigo)]);
+        
+    }
+
+    public function yaImpresos(Request $request)
+    {
+        $codigo = Sucursal::obtenerCodigo($request->get('id_suc'));
+        Codigo::codigosYaImpresos($codigo);
+        return redirect('/admin/codigos')->with(['resultado' => "exito"]);
+        
+    }
+
+
+    public function searchCodigos(Request $request) {
+        if ($request->ajax())
+        {
+            // User::where('id_sucursal','LIKE', '%'.$request->get('search').'%')->get();
+            Paginator::useBootstrap();
+            $codigos = Codigo::codigosDeSucursal(Sucursal::obtenerCodigo($request->get('search')));
+            $band = 1;
+            $output = '<table id="zero_config" class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Codigo</th>
+                                                <th>Disponible</th>
+                                                <th>Impreso</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>';            
+            foreach($codigos as $codigo){
+                    $output .= '<tr>
+                                                <td>'.$band.'
+                                                </td>
+                                                <td>
+                                                    '.$codigo->codigo.'
+                                                </td>
+                                                <td>';
+            if ($codigo->disponible == 'Y'){
+                $output .= 'Si';
+            } else {
+                $output .= 'No';
+            }
+            $output .= '</td><td>';
+            if ($codigo->impreso == 'Y'){
+                $output .= 'Si';
+            } else {
+                $output .= 'No';
+            }
+            $output .= '</td>
+                                            </tr>';
+                ++$band;
+                }
+            $output .= '</tbody>
+                                    </table>
+                                    <button class="btn btn-dark rounded me-2" onclick="impresion()">Impresión de Códigos</button>
+                                    <button class="btn btn-dark rounded" onclick="aprobarCodigos()">Validación de Códigos</button>';
+            return $output;
+        }       
+        
+    }
+
+
+    public function verifContra(Request $request)
+    {
+        if ($request->post('actual') != '' && $request->post('nueva') != ''){
+            $us = User::destinatarioEntrante(Session::get('user_id'));
+            if (Hash::check($request->post('actual'), $us->password)){
+                $us->password = Hash::make($request->post('nueva'));
+                $us->save();
+                return redirect('/admin/cambio-contra')->with(['resultado' => "exito"]);
+            }
+            else{
+                return redirect('/admin/cambio-contra')->with(['resultado' => "error"]);
+            }
+        }
+        else{
+            return redirect('/admin/cambio-contra')->with(['resultado' => "debe"]);
+        }
+    }
+
+
+
+
+    public function busquedaParaBusquedas(Request $request)
+    {
+        if ($request->get('search') != '')
+        {
+            Paginator::useBootstrap();
+            $usuarios = User::where('primerNombre','LIKE', '%'.$request->get('search').'%')
+            ->orWhere('segundoNombre','LIKE', '%'.$request->get('search').'%')
+            ->orWhere('primerApellido','LIKE', '%'.$request->get('search').'%')
+            ->orWhere('segundoApellido','LIKE', '%'.$request->get('search').'%')
+            ->orWhere('apellidoCasada','LIKE', '%'.$request->get('search').'%')->paginate(5);
+            $output = '<table class="table no-wrap v-middle mb-0">
+                                        <thead>
+                                            <tr class="border-0">
+                                                <th class="border-0 font-14 font-weight-medium text-muted">Nombre/Email
+                                                </th>
+                                                <th class="border-0 font-14 font-weight-medium text-muted px-2">Cargo
+                                                </th>
+                                                <th class="border-0 font-14 font-weight-medium text-muted">Sucursal</th>
+                                                <th class="border-0 font-14 font-weight-medium text-muted">Envío</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>';       
+            foreach($usuarios as $usuario){
+                $output .= '<tr>
+                    <td class="border-top-0 px-2 py-4">
+                        <div class="d-flex no-block align-items-center">
+                                                                <div class="me-3"><img src="/images/dashboard/profile-pic.jpg" alt="user" class="rounded-circle" width="45" height="45"></div>
+                                                                <div class="">
+                            <h5 class="text-dark mb-0 font-16 font-weight-medium">'.$usuario->primerNombre.' '.$usuario->segundoNombre.' '.$usuario->primerApellido.' ';
+                            if ($usuario->apellidoCasada != '')
+                            {
+                                $output .= $usuario->apellidoCasada.'</h5>';
+                            }
+                            else
+                            {
+                                $output .= $usuario->segundoApellido.'</h5>';
+                            }
+                            $output .= '<span class="text-muted font-14">'.$usuario->email.'</span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="border-top-0 text-muted px-2 py-4 font-14">';
+                            $output .= $usuario->cargo.'</td>
+                                                        <td class="border-top-0 px-2 py-4">'.Sucursal::nombreDeSucursal($usuario->id_sucursal).'</td>
+                                                        <td class="border-top-0 text-muted px-2 py-4 font-14"><a onclick="envios('.$usuario->id.')" id="envio" class="boton btn btn-dark">Envios</a></td>
+                                                    </tr>';
+                    }
+            $output .= '</tbody></table><div class="pagination mt-2" style="display:flex;flex-direction:row;justify-content:center;>'.$usuarios->links().'</div>';
+            return $output;
+        }
+        return '<table class="table no-wrap v-middle mb-0">
+                                        <thead>
+                                            <tr class="border-0">
+                                                <th class="border-0 font-14 font-weight-medium text-muted">Nombre/Email
+                                                </th>
+                                                <th class="border-0 font-14 font-weight-medium text-muted px-2">Cargo
+                                                </th>
+                                                <th class="border-0 font-14 font-weight-medium text-muted">Sucursal</th>
+                                                <th class="border-0 font-14 font-weight-medium text-muted">Envío</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="4" style="background-color:#f9fbfd; height: 200px; text-align: center;"><i data-feather="search" class="feather-icon"></i>No hay resultados...</td>
+                                            </tr>
+                                            </tbody></table>';
+    }
+
+
+
+
+    public function busquedaParaResultados(Request $request)
+    {
+        if ($request->get('funcion') == '0'){
+            if ($request->get('select') == '0'){
+                if ($request->get('date') == 'NaN-NaN-NaN'){
+                    return '<tr>
+                                                <td colspan="8">
+                                                    <div class="w-100 d-flex flex-row justify-content-center align-items-center" style="height: 200px;">
+                                                        <div class="d-flex flex-row"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1 me-2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><p>Debe ingresar una fecha...</p></div>
+                                                    </div>
+                                                </td>
+                                            </tr>';                }
+                else {
+                    $resultado = Envio::getEnviosDestFecha($request->get('id'), $request->get('date'));
+                    if (count($resultado) > 0){
+                        $band = 1;
+                        $output = '';
+                        foreach($resultado as $resul){
+                            $output .= '<tr>
+                                                <td>'.
+                                                    $band
+                                                .'</td>
+                                                <td>'.
+                                                    User::nombreApellido($resul->idRemitente)
+                                                .'</td>
+                                                <td>'.
+                                                    $resul->primerNombre.' '.$resul->primerApellido
+                                                .'</td>
+                                                <td>'.
+                                                    $resul->nombreSucursal
+                                                .'</td>
+                                                <td>';
+                            if ($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'N' && $resul->recibidoDestinatario == 'N' && $resul->anulado == 'N'){
+                                $output .= '<span class="badge rounded-pill text-bg-warning">Enviado</span>';
+                            }
+                            elseif ($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'N' && $resul->recibidoDestinatario == 'N' && $resul->anulado == 'Y'){
+                                $output .= '<span class="badge rounded-pill text-bg-secondary">Anulado</span>';}
+                            elseif($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'Y' && $resul->recibidoDestinatario == 'N'){
+                                $output .= '<span class="badge rounded-pill text-bg-danger">En camino</span>';}
+                            elseif($resul->aprobadoPamDestino == 'Y' && $resul->aprobadoPamRemitente == 'Y'  && $resul->recibidoDestinatario == 'N'){
+                                $output .= '<a class="btn btn-success btn-rounded" style="font-size: 12px; padding: 3px 7px;"><i class="fas fa-check" style="margin-right:5px;"></i> Listo!</a>';}
+                            else{
+                                $output .= '<span class="badge rounded-pill text-bg-success">Recibido</span>';}
+                            $output .= '</td>
+                                                <td>'.
+                                                    date_format(date_create($resul->created_at), "d/m/Y")
+                                                .'</td>';
+                            if($resul->fechaRecibido == Null){
+                                $output .= '<td>
+                                                    --
+                                                </td>';
+                            }
+                            else{
+                                $output .= '<td>'.
+                                                    date_format(date_create($resul->fechaRecibido), "d/m/Y")
+                                                .'</td>';
+                            }  
+                            $output .= '<td>
+                                                    <a onclick="gestSaliente('.$resul->id.','.$resul->idDestinatario.');" id="envio" class="btn badge rounded-pill btn-dark" style="padding:0.5rem" data-bs-toggle="modal" data-bs-target="#ventanaModal">'.$resul->codigo.'</a>
+                                                </td>
+                                            </tr>';
+                            ++$band;
+                        }
+                        return $output;
+                    }else{
+                        return '<tr>
+                                                <td colspan="8">
+                                                    <div class="w-100 d-flex flex-row justify-content-center align-items-center" style="height: 200px;">
+                                                        <div class="d-flex flex-row"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1 me-2"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="15" x2="16" y2="15"></line><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg><p>No hay registros en esa fecha...</p></div>
+                                                    </div>
+                                                </td>
+                                            </tr>';
+                    }
+                }
+            }
+            else{
+                $resultado = Envio::getEnviosDestTodos($request->get('id'));
+                if (count($resultado) > 0){
+                    $band = 1;
+                    $output = '';
+                    foreach($resultado as $resul){
+                        $output .= '<tr>
+                                            <td>'.
+                                                $band
+                                            .'</td>
+                                            <td>'.
+                                                User::nombreApellido($resul->idRemitente)
+                                            .'</td>
+                                            <td>'.
+                                                $resul->primerNombre.' '.$resul->primerApellido
+                                            .'</td>
+                                            <td>'.
+                                                $resul->nombreSucursal
+                                            .'</td>
+                                            <td>';
+                        if ($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'N' && $resul->recibidoDestinatario == 'N' && $resul->anulado == 'N'){
+                            $output .= '<span class="badge rounded-pill text-bg-warning">Enviado</span>';
+                        }
+                        elseif ($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'N' && $resul->recibidoDestinatario == 'N' && $resul->anulado == 'Y'){
+                            $output .= '<span class="badge rounded-pill text-bg-secondary">Anulado</span>';}
+                        elseif($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'Y' && $resul->recibidoDestinatario == 'N'){
+                            $output .= '<span class="badge rounded-pill text-bg-danger">En camino</span>';}
+                        elseif($resul->aprobadoPamDestino == 'Y' && $resul->aprobadoPamRemitente == 'Y'  && $resul->recibidoDestinatario == 'N'){
+                            $output .= '<a class="btn btn-success btn-rounded" style="font-size: 12px; padding: 3px 7px;"><i class="fas fa-check" style="margin-right:5px;"></i> Listo!</a>';}
+                        else{
+                            $output .= '<span class="badge rounded-pill text-bg-success">Recibido</span>';}
+                        $output .= '</td>
+                                            <td>'.
+                                                date_format(date_create($resul->created_at), "d/m/Y")
+                                            .'</td>';
+                        if($resul->fechaRecibido == Null){
+                            $output .= '<td>
+                                                --
+                                            </td>';
+                        }
+                        else{
+                            $output .= '<td>'.
+                                                date_format(date_create($resul->fechaRecibido), "d/m/Y")
+                                            .'</td>';
+                        }  
+                        $output .= '<td>
+                                                <a onclick="gestSaliente('.$resul->id.','.$resul->idDestinatario.');" id="envio" class="btn badge rounded-pill btn-dark" style="padding:0.5rem" data-bs-toggle="modal" data-bs-target="#ventanaModal">'.$resul->codigo.'</a>
+                                            </td>
+                                        </tr>';
+                        ++$band;
+                    }
+                    return $output;
+                }else{
+                    return '<tr>
+                                            <td colspan="8">
+                                                <div class="w-100 d-flex flex-row justify-content-center align-items-center" style="height: 200px;">
+                                                    <div class="d-flex flex-row"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1 me-2"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="15" x2="16" y2="15"></line><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg><p>No hay registros...</p></div>
+                                                </div>
+                                            </td>
+                                        </tr>';
+                }
+            }
+        }
+        else{
+            if ($request->get('select') == '0'){
+                if ($request->get('date') == 'NaN-NaN-NaN'){
+                    return '<tr>
+                                                <td colspan="8">
+                                                    <div class="w-100 d-flex flex-row justify-content-center align-items-center" style="height: 200px;">
+                                                        <div class="d-flex flex-row"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1 me-2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><p>Debe ingresar una fecha...</p></div>
+                                                    </div>
+                                                </td>
+                                            </tr>';                }
+                else {
+                    $resultado = Envio::getEnviosRemFecha($request->get('id'), $request->get('date'));
+                    if (count($resultado) > 0){
+                        $band = 1;
+                        $output = '';
+                        foreach($resultado as $resul){
+                            $output .= '<tr>
+                                                <td>'.
+                                                    $band
+                                                .'</td>
+                                                <td>'.
+                                                    User::nombreApellido($resul->idRemitente)
+                                                .'</td>
+                                                <td>'.
+                                                    $resul->primerNombre.' '.$resul->primerApellido
+                                                .'</td>
+                                                <td>'.
+                                                    $resul->nombreSucursal
+                                                .'</td>
+                                                <td>';
+                            if ($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'N' && $resul->recibidoDestinatario == 'N' && $resul->anulado == 'N'){
+                                $output .= '<span class="badge rounded-pill text-bg-warning">Enviado</span>';
+                            }
+                            elseif ($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'N' && $resul->recibidoDestinatario == 'N' && $resul->anulado == 'Y'){
+                                $output .= '<span class="badge rounded-pill text-bg-secondary">Anulado</span>';}
+                            elseif($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'Y' && $resul->recibidoDestinatario == 'N'){
+                                $output .= '<span class="badge rounded-pill text-bg-danger">En camino</span>';}
+                            elseif($resul->aprobadoPamDestino == 'Y' && $resul->aprobadoPamRemitente == 'Y'  && $resul->recibidoDestinatario == 'N'){
+                                $output .= '<a class="btn btn-success btn-rounded" style="font-size: 12px; padding: 3px 7px;"><i class="fas fa-check" style="margin-right:5px;"></i> Listo!</a>';}
+                            else{
+                                $output .= '<span class="badge rounded-pill text-bg-success">Recibido</span>';}
+                            $output .= '</td>
+                                                <td>'.
+                                                    date_format(date_create($resul->created_at), "d/m/Y")
+                                                .'</td>';
+                            if($resul->fechaRecibido == Null){
+                                $output .= '<td>
+                                                    --
+                                                </td>';
+                            }
+                            else{
+                                $output .= '<td>'.
+                                                    date_format(date_create($resul->fechaRecibido), "d/m/Y")
+                                                .'</td>';
+                            }  
+                            $output .= '<td>
+                                                    <a onclick="gestSaliente('.$resul->id.','.$resul->idDestinatario.');" id="envio" class="btn badge rounded-pill btn-dark" style="padding:0.5rem" data-bs-toggle="modal" data-bs-target="#ventanaModal">'.$resul->codigo.'</a>
+                                                </td>
+                                            </tr>';
+                            ++$band;
+                        }
+                        return $output;
+                    }else{
+                        return '<tr>
+                                                <td colspan="8">
+                                                    <div class="w-100 d-flex flex-row justify-content-center align-items-center" style="height: 200px;">
+                                                        <div class="d-flex flex-row"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1 me-2"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="15" x2="16" y2="15"></line><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg><p>No hay registros en esa fecha...</p></div>
+                                                    </div>
+                                                </td>
+                                            </tr>';
+                    }
+                }
+            }
+            else{
+                $resultado = Envio::getEnviosRemTodos($request->get('id'));
+                if (count($resultado) > 0){
+                    $band = 1;
+                    $output = '';
+                    foreach($resultado as $resul){
+                        $output .= '<tr>
+                                            <td>'.
+                                                $band
+                                            .'</td>
+                                            <td>'.
+                                                User::nombreApellido($resul->idRemitente)
+                                            .'</td>
+                                            <td>'.
+                                                $resul->primerNombre.' '.$resul->primerApellido
+                                            .'</td>
+                                            <td>'.
+                                                $resul->nombreSucursal
+                                            .'</td>
+                                            <td>';
+                        if ($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'N' && $resul->recibidoDestinatario == 'N' && $resul->anulado == 'N'){
+                            $output .= '<span class="badge rounded-pill text-bg-warning">Enviado</span>';
+                        }
+                        elseif ($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'N' && $resul->recibidoDestinatario == 'N' && $resul->anulado == 'Y'){
+                            $output .= '<span class="badge rounded-pill text-bg-secondary">Anulado</span>';}
+                        elseif($resul->aprobadoPamDestino == 'N' && $resul->aprobadoPamRemitente == 'Y' && $resul->recibidoDestinatario == 'N'){
+                            $output .= '<span class="badge rounded-pill text-bg-danger">En camino</span>';}
+                        elseif($resul->aprobadoPamDestino == 'Y' && $resul->aprobadoPamRemitente == 'Y'  && $resul->recibidoDestinatario == 'N'){
+                            $output .= '<a class="btn btn-success btn-rounded" style="font-size: 12px; padding: 3px 7px;"><i class="fas fa-check" style="margin-right:5px;"></i> Listo!</a>';}
+                        else{
+                            $output .= '<span class="badge rounded-pill text-bg-success">Recibido</span>';}
+                        $output .= '</td>
+                                            <td>'.
+                                                date_format(date_create($resul->created_at), "d/m/Y")
+                                            .'</td>';
+                        if($resul->fechaRecibido == Null){
+                            $output .= '<td>
+                                                --
+                                            </td>';
+                        }
+                        else{
+                            $output .= '<td>'.
+                                                date_format(date_create($resul->fechaRecibido), "d/m/Y")
+                                            .'</td>';
+                        }  
+                        $output .= '<td>
+                                                <a onclick="gestSaliente('.$resul->id.','.$resul->idDestinatario.');" id="envio" class="btn badge rounded-pill btn-dark" style="padding:0.5rem" data-bs-toggle="modal" data-bs-target="#ventanaModal">'.$resul->codigo.'</a>
+                                            </td>
+                                        </tr>';
+                        ++$band;
+                    }
+                    return $output;
+                }else{
+                    return '<tr>
+                                            <td colspan="8">
+                                                <div class="w-100 d-flex flex-row justify-content-center align-items-center" style="height: 200px;">
+                                                    <div class="d-flex flex-row"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1 me-2"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="15" x2="16" y2="15"></line><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg><p>No hay registros...</p></div>
+                                                </div>
+                                            </td>
+                                        </tr>';
+                }
+            }
+        }
+    }
+
+
+
+    public function searchSaliente(Request $request)
+    {
+        $envios = Envio::searchSalientes(Session::get('sucursalId'),$request->get('query'));
+        $output = '';
+        $band = 1;
+        foreach($envios as $envio){
+            $output .= '<tr>
+                                                <td>
+                                                    '.$band.'
+                                                </td>
+                                                <td>
+                                                '.$envio->primerNombre.' '.$envio->primerApellido.'
+                                                </td>
+                                                <td>
+                                                    '.User::nombreApellido($envio->idDestinatario).'
+                                                </td>
+                                                <td>
+                                                    '.Sucursal::sucursalDestinatario($envio->sucDestinatario).'
+                                                </td>
+                                                <td>
+                                                    '.date_format(date_create($envio->created_at), "d/m/Y").'
+                                                </td>
+                                                <td>
+                                                    <a onclick="gestSaliente('.$envio->id.','.$envio->idDestinatario.');" id="envio" class="btn badge rounded-pill btn-dark" style="padding:0.5rem" data-bs-toggle="modal" data-bs-target="#ventanaModal">'.$envio->codigo.'</a>
+                                                </td>
+                                            </tr>';
+                                            $band++;
+        }
+        return $output;
+    }
+
+
+
+
+
+    public function searchEntrante(Request $request)
+    {
+        $envios = Envio::searchEntrantes(Session::get('sucursalId'),$request->get('query'));
+        $output = '';
+        $band = 1;
+        foreach($envios as $envio){
+            $output .= '<tr>
+                                                <td>
+                                                    '.$band.'
+                                                </td>
+                                                <td>
+                                                '.$envio->primerNombre.' '.$envio->primerApellido.'
+                                                </td>
+                                                <td>
+                                                    '.User::nombreApellido($envio->idRemitente).'
+                                                </td>
+                                                <td>
+                                                    '.Sucursal::sucursalDestinatario($envio->sucRemitente).'
+                                                </td>
+                                                <td>
+                                                    '.date_format(date_create($envio->created_at), "d/m/Y").'
+                                                </td>
+                                                <td>
+                                                    <a onclick="gestEntrante('.$envio->id.','.$envio->idDestinatario.');" id="envio" class="btn badge rounded-pill btn-dark" style="padding:0.5rem" data-bs-toggle="modal" data-bs-target="#ventanaModal">'.$envio->codigo.'</a>
+                                                </td>
+                                            </tr>';
+                                            $band++;
+        }
+        return $output;
+    }
+
+
+
+
+
+
+    public function cambioContra()
+    {
+        $variable = Session::get('rol');
+        $mifecha = $this->fecha();
+        return view('admin.admin-contrasena', ['fecha' => $mifecha ]);
+    }
 
 
 

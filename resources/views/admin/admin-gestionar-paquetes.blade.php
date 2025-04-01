@@ -11,9 +11,9 @@
                         <div class="card">
                             @if (count($envios) > 0)
                             <div class="card-body mt-3">
-                                <h4 class="card-title mb-4">Envíos Salientes</h4>
+                                <div class="w-100 d-flex flex-row justify-content-between align-items-center pb-4"><h4 class="card-title mb-4" style="margin-bottom:0px!important;">Envíos Salientes</h4><input type="search" class="form-control" placeholder="#código" id="codSaliente" style="width: 200px;"></div>
                                 <div class="row">
-                                <div class="table-responsive" id="search_list">
+                                <div class="table-responsive">
                                     <table id="zero_config" class="table">
                                         <thead>
                                             <tr>
@@ -25,7 +25,7 @@
                                                 <th>Gestión</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="salientes">
                                             @foreach ($envios as $key=>$envio)
                                             <tr>
                                                 <td>
@@ -97,9 +97,9 @@
                         <div class="card">
                             @if (count($enviosEnt) > 0)
                             <div class="card-body mt-3">
-                                <h4 class="card-title mb-4">Envíos Entrantes</h4>
+                                <div class="w-100 d-flex flex-row justify-content-between align-items-center pb-4"><h4 class="card-title mb-4" style="margin-bottom:0px!important;">Envíos Entrantes</h4><input type="search" class="form-control" placeholder="#código" id="codEntrante" style="width:200px;"></div>
                                 <div class="row">
-                                <div class="table-responsive" id="search_list">
+                                <div class="table-responsive">
                                     <table id="zero_config" class="table">
                                         <thead>
                                             <tr>
@@ -111,7 +111,7 @@
                                                 <th>Gestión</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="entrantes">
                                             @foreach ($enviosEnt as $key=>$envioE)
                                             <tr>
                                                 <td>
@@ -176,6 +176,33 @@
 
 
                 <script type="text/javascript">
+                $(document).ready(function(){
+                        $('#codSaliente').on('keyup', function(){
+                            var query = $(this).val();
+                            $.ajax({
+                                url: "/admin/search-saliente",
+                                type: "GET",
+                                data:{'query' : query},
+                                success:function(data){
+                                    $('#salientes').html(data);
+                                }
+                            });
+                        });
+                        $('#codEntrante').on('keyup', function(){
+                            var query = $(this).val();
+                            $.ajax({
+                                url: "/admin/search-entrante",
+                                type: "GET",
+                                data:{'query' : query},
+                                success:function(data){
+                                    $('#entrantes').html(data);
+                                }
+                            });
+                        });
+                    });
+
+
+
                 function gestSaliente(query,de) {
                     $.ajax({
                         url: "/admin/get-descripcion",

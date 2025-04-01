@@ -15,7 +15,7 @@
                                         <div class="card card-hover">
                                             <div class="p-2 bg-dark text-center">
                                                 <h1 class="font-light text-white">{{$totales}}</h1>
-                                                <h6 class="text-white">Total de Usuarios</h6>
+                                                <h6 class="text-white">Total de Usuarios/as</h6>
                                             </div>
                                         </div>
                                     </div>
@@ -24,7 +24,7 @@
                                         <div class="card card-hover">
                                             <div class="p-2 text-center" style="background-color: #c00303;">
                                                 <h1 class="font-light text-white">{{$admins}}</h1>
-                                                <h6 class="text-white">Administradores</h6>
+                                                <h6 class="text-white">Administradores/as</h6>
                                             </div>
                                         </div>
                                     </div>
@@ -33,7 +33,7 @@
                                         <div class="card card-hover">
                                             <div class="p-2 bg-secondary text-center">
                                                 <h1 class="font-light text-white">{{$estats}}</h1>
-                                                <h6 class="text-white">Usuarios con Estadísticas</h6>
+                                                <h6 class="text-white">Gestores/as de Paquetes</h6>
                                             </div>
                                         </div>
                                     </div>

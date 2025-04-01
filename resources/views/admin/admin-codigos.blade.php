@@ -12,8 +12,8 @@
                             <div class="card-body">
                                 <form action="" id="myForm">
                                 <div style="display:flex; flex-direction: row; flex-wrap: wrap;">
-                                    @foreach ($sucursales as $sucursal)
-                                    @if ($sucursal->id == 1)
+                                    @foreach ($sucursales as $key=>$sucursal)
+                                    @if ($key == 0)
                                     <label class="btn btn-dark me-3 mb-3 rounded-pill">
                                         <div class="custom-control custom-checkbox mr-sm-2">
                                             <input type="radio" checked class="custom-control-input" name="radiobutton" value="{{ $sucursal->id }}">
@@ -53,16 +53,16 @@
                                                 </td>
                                                 <td>
                                                     @if ($codigo->disponible == 'Y')
-                                                    Si
+                                                    <i data-feather="check-square" class="feather-icon me-3" style="color:green"></i>
                                                     @else
-                                                    No
+                                                    <i data-feather="check-square" class="feather-icon me-3" style="color:#e8e6e6"></i>
                                                     @endif
                                                 </td>
                                                 <td>
                                                     @if ($codigo->impreso == 'Y')
-                                                    Si
+                                                    <i data-feather="check-square" class="feather-icon me-3" style="color:green"></i>
                                                     @else
-                                                    No
+                                                    <i data-feather="check-square" class="feather-icon me-3" style="color:#e8e6e6"></i>
                                                     @endif
                                                     
                                                 </td>
@@ -71,6 +71,8 @@
                                         </tbody>
                                     </table>
                                     {{-- <div class="pagination" style="display:flex;flex-direction:row;justify-content:center;">{{$listaCodigos->links()}}</div> --}}
+                                    <button class="btn btn-dark rounded me-2" onclick="impresion()">Impresión de Códigos</button>
+                                    <button class="btn btn-dark rounded" onclick="aprobarCodigos()">Validación de Códigos</button>
                                 </div>
                             </div>
                         </div>
@@ -83,7 +85,7 @@
                         $("input[name='radiobutton']").click(function(){
                             var query = $(this).val();
                             $.ajax({
-                                url: "/admin/search",
+                                url: "/admin/search-codigos",
                                type: "GET",
                                 data:{'search' : query},
                                 success:function(data){
@@ -97,19 +99,20 @@
                         e.preventDefault();
                         let page = $(this).attr('href').split('page=')[1];
                         product(page);
-                    })
+                    });
 
-                    function product(page){
-                        var num = $('input[name=radiobutton]:checked', '#myForm').val();
-                        $.ajax({
-                            url: "/admin/search",
-                            type: "GET",
-                            data:{'page' : page, 'search' : num},
-                            success:function(data){
-                                $('#search_list').html(data);
-                            }
-                        })
+                    function impresion(){
+                        $('input[name="radiobutton"]:checked').each(function() {
+                            location.href="/admin/impresion-codigos?id_suc="+this.value;
+                        });
+                    };
+
+                    function aprobarCodigos(){
+                        $('input[name="radiobutton"]:checked').each(function() {
+                            location.href="/admin/ya-impresos?id_suc="+this.value;
+                        });
+                    };
                     
-                    }
+                    
                     </script>
 @endsection
